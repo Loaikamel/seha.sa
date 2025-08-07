@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الإجازات المرضية</title>
+  <link rel="stylesheet" href="style.css">
+
+  <script>
+document.getElementById('searchForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const code = document.getElementById('serviceCode').value;
+  const id = document.getElementById('idNumber').value;
+
+  const res = await fetch(`/search?code=${code}&id=${id}`);
+  if (res.status === 200) {
+    const data = await res.json();
+    localStorage.setItem('resultData', JSON.stringify(data));
+    window.location.href = 'result.html';
+  } else {
+    alert('❌ لم يتم العثور على البيانات');
+  }
+};
+</script>
+
+</head>
+<body>
+
+  <header>
+    <h1>الإجازات المرضية</h1>
+    <p>خدمة الاستعلام عن الإجازات المرضية تتيح لك الاستعلام عن حالة طلب الإجازة وطباعتها عن طريق تطبيق صحتي</p>
+  </header>
+
+  <main>
+    <form id="searchForm">
+    <input type="text" id="serviceCode" placeholder="رمز الخدمة" required>
+    <input type="text" id="idNumber" placeholder="رقم الهوية / الإقامة" required>
+    <button type="submit">استعلام</button>
+    </form>
+  </main>
+
+  <footer>
+    <div class="footer-section">
+      <h3>تواصل معنا</h3>
+      <p>920002005 📞</p>
+      <p>support@seha.sa 📧</p>
+      <p>920002005 💬</p>
+      <p>أوقات العمل: الأحد إلى الخميس 8 ص - 11 م</p>
+    </div>
+    <div class="footer-section">
+      <h3>القائمة الرئيسية</h3>
+      <ul>
+        <li>الخدمات</li>
+        <li>الاستعلامات</li>
+        <li>الأسئلة الشائعة</li>
+        <li>تواصل معنا</li>
+      </ul>
+    </div>
+    <div class="footer-section logo">
+      <h2>صحة</h2>
+      <p>Seha</p>
+      <p>منصة صحة تخدم جميع المنشآت الطبية...</p>
+    </div>
+  </footer>
+
+</body>
+</html>

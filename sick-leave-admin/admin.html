@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة تحكم المدير</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <main>
+    <h2>لوحة التحكم - إدخال بيانات الإجازة</h2>
+    <form id="adminForm">
+      <input type="text" name="name" placeholder="الاسم" required>
+      <input type="text" name="service_code" placeholder="رمز الخدمة" required>
+      <input type="text" name="id_number" placeholder="رقم الهوية / الإقامة" required>
+      <input type="date" name="issue_date" placeholder="تاريخ الإصدار" required>
+      <input type="date" name="start_date" placeholder="تبدأ من" required>
+      <input type="date" name="end_date" placeholder="حتى" required>
+      <input type="number" name="duration" placeholder="المدة بالأيام" required>
+      <input type="text" name="doctor_name" placeholder="اسم الطبيب" required>
+      <input type="text" name="job_title" placeholder="المسمى الوظيفي" required>
+      <button type="submit">حفظ البيانات</button>
+    </form>
+    <p id="status"></p>
+  </main>
+
+  <script>
+    const form = document.getElementById('adminForm');
+    const status = document.getElementById('status');
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+
+      const res = await fetch('/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.text();
+      status.textContent = result;
+      form.reset();
+    };
+  </script>
+
+</body>
+</html>
