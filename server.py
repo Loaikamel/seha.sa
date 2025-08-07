@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
 import json
+import os
 
 app = Flask(__name__)
 
@@ -12,7 +13,7 @@ def home():
 @app.route('/save', methods=['POST'])
 def save():
     new_data = request.get_json()
-    
+
     try:
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -48,4 +49,5 @@ def search():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # <-- التعديل هنا
+    app.run(host='0.0.0.0', port=port, debug=True)
