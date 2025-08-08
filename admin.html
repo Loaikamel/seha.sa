@@ -4,47 +4,265 @@
   <meta charset="UTF-8">
   <title>لوحة تحكم المدير</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 10px;
+    }
+    
+    .admin-header h2 {
+      margin: 0;
+      color: #2c5aa0;
+    }
+    
+    .admin-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .admin-actions a, .admin-actions button {
+      padding: 10px 20px;
+      background: #2c5aa0;
+      color: white;
+      text-decoration: none;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .admin-actions a:hover, .admin-actions button:hover {
+      background: #1e3d6f;
+    }
+    
+    .logout-btn {
+      background: #d32f2f !important;
+    }
+    
+    .logout-btn:hover {
+      background: #b71c1c !important;
+    }
+    
+    .navigation-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    
+    .tab-button {
+      padding: 10px 20px;
+      background: #e0e0e0;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    .tab-button.active {
+      background: #2c5aa0;
+      color: white;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    .data-table th, .data-table td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: right;
+    }
+    
+    .data-table th {
+      background: #f5f5f5;
+      font-weight: bold;
+    }
+    
+    .data-table tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+  </style>
 </head>
 <body>
 
-  <main>
-    <h2>لوحة التحكم - إدخال بيانات الإجازة</h2>
-    <form id="adminForm">
-      <input type="text" name="name" placeholder="الاسم" required>
-      <input type="text" name="service_code" placeholder="رمز الخدمة" required>
-      <input type="text" name="id_number" placeholder="رقم الهوية / الإقامة" required>
-      <input type="date" name="issue_date" placeholder="تاريخ الإصدار" required>
-      <input type="date" name="start_date" placeholder="تبدأ من" required>
-      <input type="date" name="end_date" placeholder="حتى" required>
-      <input type="number" name="duration" placeholder="المدة بالأيام" required>
-      <input type="text" name="doctor_name" placeholder="اسم الطبيب" required>
-      <input type="text" name="job_title" placeholder="المسمى الوظيفي" required>
-      <button type="submit">حفظ البيانات</button>
-    </form>
-    <p id="status"></p>
-  </main>
+  <div class="admin-header">
+    <h2>لوحة تحكم المدير</h2>
+    <div class="admin-actions">
+      <a href="/">الصفحة الرئيسية</a>
+      <a href="/logout" class="logout-btn">تسجيل الخروج</a>
+    </div>
+  </div>
+
+  <div class="navigation-tabs">
+    <button class="tab-button active" onclick="showTab('add-data')">إضافة بيانات</button>
+    <button class="tab-button" onclick="showTab('view-data')">عرض البيانات</button>
+  </div>
+
+  <div id="add-data" class="tab-content active">
+    <main>
+      <h3>إدخال بيانات الإجازة المرضية</h3>
+      <form id="adminForm">
+        <input type="text" name="name" placeholder="الاسم" required>
+        <input type="text" name="service_code" placeholder="رمز الخدمة" required>
+        <input type="text" name="id_number" placeholder="رقم الهوية / الإقامة" required>
+        <input type="date" name="issue_date" placeholder="تاريخ الإصدار" required>
+        <input type="date" name="start_date" placeholder="تبدأ من" required>
+        <input type="date" name="end_date" placeholder="حتى" required>
+        <input type="number" name="duration" placeholder="المدة بالأيام" required>
+        <input type="text" name="doctor_name" placeholder="اسم الطبيب" required>
+        <input type="text" name="job_title" placeholder="المسمى الوظيفي" required>
+        <button type="submit">حفظ البيانات</button>
+      </form>
+      <p id="status"></p>
+    </main>
+  </div>
+
+  <div id="view-data" class="tab-content">
+    <h3>عرض جميع البيانات</h3>
+    <button onclick="loadData()" style="margin-bottom: 20px; padding: 10px 20px; background: #2c5aa0; color: white; border: none; border-radius: 5px; cursor: pointer;">تحديث البيانات</button>
+    <div id="dataContainer">
+      <p>اضغط على "تحديث البيانات" لعرض جميع السجلات</p>
+    </div>
+  </div>
 
   <script>
     const form = document.getElementById('adminForm');
     const status = document.getElementById('status');
 
+    // إرسال بيانات النموذج
     form.onsubmit = async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
       const data = Object.fromEntries(formData);
 
-      const res = await fetch('/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+      try {
+        const res = await fetch('/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+          const result = await res.text();
+          status.textContent = result;
+          status.style.color = 'green';
+          form.reset();
+        } else if (res.status === 302) {
+          // إعادة توجيه لتسجيل الدخول
+          window.location.href = '/login';
+        } else {
+          status.textContent = 'حدث خطأ في حفظ البيانات';
+          status.style.color = 'red';
+        }
+      } catch (error) {
+        status.textContent = 'حدث خطأ في الاتصال';
+        status.style.color = 'red';
+      }
+    };
+
+    // تبديل التبويبات
+    function showTab(tabName) {
+      // إخفاء جميع التبويبات
+      const tabs = document.querySelectorAll('.tab-content');
+      tabs.forEach(tab => tab.classList.remove('active'));
+      
+      // إزالة الفئة النشطة من جميع الأزرار
+      const buttons = document.querySelectorAll('.tab-button');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      
+      // إظهار التبويب المحدد
+      document.getElementById(tabName).classList.add('active');
+      
+      // تفعيل الزر المحدد
+      event.target.classList.add('active');
+    }
+
+    // تحميل البيانات
+    async function loadData() {
+      try {
+        const res = await fetch('/data');
+        
+        if (res.ok) {
+          const data = await res.json();
+          displayData(data);
+        } else if (res.status === 302) {
+          window.location.href = '/login';
+        } else {
+          document.getElementById('dataContainer').innerHTML = '<p style="color: red;">حدث خطأ في تحميل البيانات</p>';
+        }
+      } catch (error) {
+        document.getElementById('dataContainer').innerHTML = '<p style="color: red;">حدث خطأ في الاتصال</p>';
+      }
+    }
+
+    // عرض البيانات في جدول
+    function displayData(data) {
+      const container = document.getElementById('dataContainer');
+      
+      if (data.length === 0) {
+        container.innerHTML = '<p>لا توجد بيانات محفوظة</p>';
+        return;
+      }
+
+      let tableHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>الاسم</th>
+              <th>رمز الخدمة</th>
+              <th>رقم الهوية</th>
+              <th>تاريخ الإصدار</th>
+              <th>تبدأ من</th>
+              <th>حتى</th>
+              <th>المدة</th>
+              <th>اسم الطبيب</th>
+              <th>المسمى الوظيفي</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      data.forEach(record => {
+        tableHTML += `
+          <tr>
+            <td>${record.name}</td>
+            <td>${record.service_code}</td>
+            <td>${record.id_number}</td>
+            <td>${record.issue_date}</td>
+            <td>${record.start_date}</td>
+            <td>${record.end_date}</td>
+            <td>${record.duration}</td>
+            <td>${record.doctor_name}</td>
+            <td>${record.job_title}</td>
+          </tr>
+        `;
       });
 
-      const result = await res.text();
-      status.textContent = result;
-      form.reset();
-    };
+      tableHTML += `
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = tableHTML;
+    }
   </script>
 
 </body>
 </html>
+
