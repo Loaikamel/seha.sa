@@ -3,7 +3,7 @@ services:
     name: sick-leave-app
     env: python
     buildCommand: ""
-    startCommand:  python ME_Updated_Fixed/server.py
+    startCommand:  python3 server.py
     envVars:
       - key: PORT
         value: 10000
